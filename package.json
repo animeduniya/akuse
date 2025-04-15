@@ -16,10 +16,6 @@
     "type": "git",
     "url": "https://github.com/akuse-app/akuse"
   },
-  "publish": {
-    "provider": "github",
-    "releaseType": "release"
-  },
   "license": "GPL-3.0-or-later",
   "author": {
     "name": "aleganza",
@@ -45,7 +41,15 @@
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "jest"
   },
-  "browserslist": [],
+  "browserslist": {
+    "production": [
+      "last 1 electron version"
+    ],
+    "development": [
+      "last 1 electron version",
+      "last 1 chrome version"
+    ]
+  },
   "prettier": {
     "singleQuote": true,
     "overrides": [
@@ -99,7 +103,6 @@
     "@fortawesome/free-regular-svg-icons": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/react-fontawesome": "^0.2.1",
-    "akuse-beta": "file:",
     "axios": "^1.6.8",
     "cheerio": "^1.0.0",
     "dompurify": "^3.1.2",
@@ -207,18 +210,87 @@
     "afterSign": ".erb/scripts/notarize.js",
     "mac": {
       "artifactName": "${os}-akuse-${version}.${ext}",
-      "target": [
-        "dmg",
-        "zip"
+      "target": {
+        "target": "default",
+        "arch": [
+          "arm64",
+          "x64"
+        ]
+      },
+      "type": "distribution",
+      "hardenedRuntime": true,
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist",
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
       ]
     },
     "win": {
-      "target": "nsis",
-      "artifactName": "${os}-akuse-${version}.${ext}"
+      "artifactName": "${os}-akuse-${version}.${ext}",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "deleteAppDataOnUninstall": true,
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "license": "LICENSE"
     },
     "linux": {
-      "target": "AppImage",
-      "artifactName": "${os}-akuse-${version}.${ext}"
-    }
+      "artifactName": "${os}-akuse-${version}.${ext}",
+      "category": "AudioVideo;Video",
+      "description": "Simple and easy to use anime streaming desktop app without ads.",
+      "desktop": {
+        "Name": "akuse",
+        "Comment": "Simple and easy to use anime streaming desktop app without ads.",
+        "Keywords": "anime",
+        "Type": "Application",
+        "MimeType": "x-scheme-handler/akuse;"
+      },
+      "target": [
+        {
+          "arch": "x64",
+          "target": "AppImage"
+        },
+        {
+          "arch": "x64",
+          "target": "deb"
+        }
+      ]
+    },
+    "directories": {
+      "app": "release/app",
+      "buildResources": "assets",
+      "output": "release/build"
+    },
+    "extraResources": [
+      "./assets/**"
+    ]
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
+  "electronmon": {
+    "patterns": [
+      "!**/**",
+      "src/main/**"
+    ],
+    "logLevel": "quiet"
   }
 }
